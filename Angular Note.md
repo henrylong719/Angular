@@ -1592,8 +1592,6 @@ export class NewAccountComponent {
 
 
 
-
-
 4. Import `accounts.service.ts`  to  `account.component.ts`
 
 ```typescript
@@ -1814,5 +1812,153 @@ export class NewAccountComponent {
 
 
 
+**Example 2**
+
+Assignment 
 
 
+
+1. Create `users.service.ts`
+
+```typescript
+
+
+import { Injectable } from "@angular/core";
+import { CounterService } from "./counter.service";
+
+@Injectable()
+
+//add this, then no need to bring it to the provides in the app.component.ts
+// @Injectable({ providedIn: "root" }) 
+
+export class UsersService {
+  activeUsers = ["Max", "Anna"];
+  inactiveUsers = ["Chris", "Manu"];
+
+  constructor(private counterService: CounterService) {}
+
+  addToActive(id: number) {
+    this.activeUsers.push(this.inactiveUsers[id]);
+    this.inactiveUsers.splice(id, 1);
+    this.counterService.addToActiveCounter();
+  }
+
+  addToInActive(id: number) {
+    this.inactiveUsers.push(this.activeUsers[id]);
+    this.activeUsers.splice(id, 1);
+    this.counterService.addToInactiveCounter();
+  }
+}
+
+```
+
+
+
+2. in the `app.component.ts`, add `providers`
+
+
+
+```typescript
+
+import { Component } from "@angular/core";
+import { UsersService } from "./users.service";
+
+@Component({
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"],
+  providers: [UsersService],
+})
+export class AppComponent {}
+
+```
+
+
+
+3. in the `active-users.component.ts`, import `UsersService`
+
+```typescript
+
+import { Component, OnInit } from "@angular/core";
+import { UsersService } from "../users.service";
+
+@Component({
+  selector: "app-active-users",
+  templateUrl: "./active-users.component.html",
+  styleUrls: ["./active-users.component.css"],
+})
+export class ActiveUsersComponent implements OnInit {
+  users: string[];
+
+  constructor(private usersService: UsersService) {}
+
+  ngOnInit() {
+    this.users = this.usersService.activeUsers;
+  }
+
+  onSetToInactive(id: number) {
+    this.usersService.addToInActive(id);
+  }
+}
+
+```
+
+
+
+4. in the `inactive-users.component.ts`, import `UsersServe`
+
+```typescript
+
+import { Component, OnInit } from "@angular/core";
+import { UsersService } from "../users.service";
+
+@Component({
+  selector: "app-inactive-users",
+  templateUrl: "./inactive-users.component.html",
+  styleUrls: ["./inactive-users.component.css"],
+})
+export class InactiveUsersComponent implements OnInit {
+  users: string[];
+
+  constructor(private usersService: UsersService) {}
+
+  ngOnInit() {
+    this.users = this.usersService.inactiveUsers;
+  }
+
+  onSetToActive(id: number) {
+    this.usersService.addToActive(id);
+  }
+}
+
+```
+
+
+
+**Injectable**
+
+1. create `counter.service.ts`
+
+```typescript
+
+// add this, then no need to bring it to the app.module.ts
+
+@Injectable({ providedIn: "root" })
+export class CounterService {
+  activeCounter: number = 0;
+  inactiveCounter: number = 0;
+
+  addToActiveCounter() {
+    this.activeCounter++;
+    console.log("inactive to Active", this.activeCounter);
+  }
+
+  addToInactiveCounter() {
+    this.inactiveCounter++;
+    console.log("Active to inactive", this.inactiveCounter);
+  }
+}
+
+```
+
+2. bring it to `users.service.ts`, see the first code snipper.
