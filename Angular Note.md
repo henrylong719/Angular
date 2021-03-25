@@ -1962,3 +1962,528 @@ export class CounterService {
 ```
 
 2. bring it to `users.service.ts`, see the first code snipper.
+
+
+
+## Routing
+
+
+
+### set up routes
+
+1. In the `app.module.ts`
+
+```typescript
+
+const appRoutes: Routes = [
+  { path: "", component: HomeComponent },
+  { path: "users", component: UserComponent },
+  { path: "servers", component: ServerComponent },
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    UsersComponent,
+    ServersComponent,
+    UserComponent,
+    EditServerComponent,
+    ServerComponent,
+  ],
+  imports: [BrowserModule, FormsModule, RouterModule.forRoot(appRoutes)],
+  providers: [ServersService],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+
+```
+
+
+
+2. in the `app.component.html`
+
+```html
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <ul class="nav nav-tabs">
+        <li
+          role="presentation"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <a [routerLink]="['/']">Home</a>
+        </li>
+        <li role="presentation" routerLinkActive="active">
+          <a routerLink="/servers">Servers</a>
+        </li>
+        <li role="presentation" routerLinkActive="active">
+          <a [routerLink]="['/users']">Users</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
+
+
+```
+
+
+
+### Navigating Programmatically
+
+```typescript
+
+// home.component.ts
+
+export class HomeComponent implements OnInit {
+  constructor(private router: Router) {}
+
+  ngOnInit() {}
+
+  onLoadServers() {
+    //complex calculation
+    this.router.navigate(["/servers"]);
+  }
+}
+
+```
+
+
+
+**use relative path**
+
+
+
+```typescript
+
+// servers.component.ts
+
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { ServersService } from "./servers.service";
+
+@Component({
+  selector: "app-servers",
+  templateUrl: "./servers.component.html",
+  styleUrls: ["./servers.component.css"],
+})
+export class ServersComponent implements OnInit {
+  public servers: { id: number; name: string; status: string }[] = [];
+
+  constructor(
+    private serversService: ServersService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit() {
+    this.servers = this.serversService.getServers();
+  }
+
+  onReload() {
+    // relativeTo: (current page)
+    this.router.navigate(["servers"], { relativeTo: this.route });
+  }
+}
+
+```
+
+
+
+### Pass parameters to routes
+
+1. add `  { path: "users/:id/:name", component: UserComponent },` to `appRoutes` in the `app.module.ts`
+2. in the `user.component.ts`, add functions to get parameters
+
+```typescript
+
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, Params } from "@angular/router";
+import { Subscription } from "rxjs";
+
+@Component({
+  selector: "app-user",
+  templateUrl: "./user.component.html",
+  styleUrls: ["./user.component.css"],
+})
+export class UserComponent implements OnInit, OnDestroy {
+  user: { id: number; name: string };
+  paramsSubscription: Subscription;
+
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    this.user = {
+      // snapshot can only work when entering from other different pages
+      id: this.route.snapshot.params["id"],
+      name: this.route.snapshot.params["name"],
+    };
+
+    // need to add an observable if there might be changes in the current page
+    this.paramsSubscription = this.route.params.subscribe((params: Params) => {
+      this.user.id = params.id;
+      this.user.name = params.name;
+    });
+  }
+
+  // for the params subscription, no need to unsubscribe (angular will do it automatically) but own defined observable needs to
+  // be unsubscribed
+  ngOnDestroy() {
+    this.paramsSubscription.unsubscribe();
+  }
+}
+
+```
+
+
+
+### Query Parameters and Fragments
+
+
+
+**Passing Query Parameters and Fragments**
+
+1. add ` { path: "servers/:id/edit", component: ServersComponent },` to `app.module.ts`
+
+
+
+​	**Add query parameters in the link**
+
+2. in the `servers.component.ts`
+
+```typescript
+
+<div class="row">
+  <div class="col-xs-12 col-sm-4">
+    <div class="list-group">
+      <a
+        [routerLink]="['/servers', 5, 'edit']"
+        [queryParams]="{ allowEdit: '1' }"
+        fragment="loading"
+        href="#"
+        class="list-group-item"
+        *ngFor="let server of servers"
+      >
+        {{ server.name }}
+      </a>
+    </div>
+  </div>
+  <div class="col-xs-12 col-sm-4">
+    <button class="btn btn-primary" (click)="onReload()">Reload Page</button>
+    <app-edit-server></app-edit-server>
+    <hr />
+    <app-server></app-server>
+  </div>
+</div>
+
+```
+
+
+
+​	**Add query parameters programmatically**
+
+
+
+3. 
+
+```typescript
+
+ onLoadServer(id: number) {
+    //complex calculation
+    // this.router.navigate(["/servers"]);
+
+    this.router.navigate(["/servers", id, "edit"], {
+      queryParams: { allowEdit: "1" },
+      fragment: "loading",
+    });
+  }
+
+```
+
+
+
+
+
+
+
+
+
+3. in the `edit-server.component.ts`
+
+```typescript
+
+  ngOnInit() {
+    console.log(this.route.snapshot.queryParams);
+    console.log(this.route.snapshot.fragment);
+
+    // or
+    this.route.queryParams.subscribe((query) => {
+      console.log(query);
+    });
+
+    this.route.fragment.subscribe((frag) => {
+      console.log(frag);
+    });
+
+    this.server = this.serversService.getServer(1);
+    this.serverName = this.server.name;
+    this.serverStatus = this.server.status;
+  }
+
+```
+
+
+
+### Child (Nested) Routes
+
+
+
+```typescript
+
+// app.module.ts
+
+const appRoutes: Routes = [
+  { path: "", component: HomeComponent },
+  {
+    path: "users",
+    component: UsersComponent,
+    children: [{ path: ":id/:name", component: UserComponent }],
+  },
+
+  {
+    path: "servers",
+    component: ServersComponent,
+    children: [
+      { path: ":id", component: ServerComponent },
+      { path: ":id/edit", component: EditServerComponent },
+    ],
+  },
+];
+```
+
+
+
+In the `users.component.html` and `servers.component.html`, use ` <router-outlet></router-outlet>` in the corresponding area.
+
+
+
+### Maintain the parameters in the url
+
+In the `server.component.ts`
+
+```typescript
+
+
+  onEdit() {
+    this.router.navigate(["edit"], {
+      relativeTo: this.route,
+      queryParamsHandling: "preserve",
+    });
+  }
+```
+
+
+
+### Redirecting and Wildcard Routes (random URL)
+
+
+
+```typescript
+
+const appRoutes: Routes = [
+  { path: "", redirectTo: "/home", pathMatch: "full" },
+  { path: "home", component: HomeComponent },
+  {
+    path: "users",
+    component: UsersComponent,
+    children: [{ path: ":id/:name", component: UserComponent }],
+  },
+  
+  // put it in the last
+  { path: "not-found", component: PageNotFoundComponent },
+  { path: "**", redirectTo: "/not-found" },
+];
+```
+
+
+
+### Move out route module
+
+
+
+```typescript
+
+// app.module.ts
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    UsersComponent,
+    ServersComponent,
+    UserComponent,
+    EditServerComponent,
+    ServerComponent,
+    PageNotFoundComponent,
+  ],
+  imports: [BrowserModule, FormsModule, AppRoutingModule],
+  providers: [ServersService],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+
+```
+
+
+
+```typescript
+
+// app-routing.module.ts
+
+const appRoutes: Routes = [
+  { path: "", redirectTo: "/home", pathMatch: "full" },
+  { path: "home", component: HomeComponent },
+  {
+    path: "users",
+    component: UsersComponent,
+    children: [{ path: ":id/:name", component: UserComponent }],
+  },
+
+  {
+    path: "servers",
+    component: ServersComponent,
+    children: [
+      { path: ":id", component: ServerComponent },
+      { path: ":id/edit", component: EditServerComponent },
+    ],
+  },
+  { path: "not-found", component: PageNotFoundComponent },
+  { path: "**", redirectTo: "/not-found" },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(appRoutes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
+
+```
+
+
+
+
+
+### Protecting Routes with canActive
+
+**source code**
+
+`auth-guard.service.ts`
+
+`auth.service.ts`
+
+`app.module.ts`
+
+`home.component.html`
+
+`home.component.ts`
+
+
+
+### Controlling Navigation with canDeactivate
+
+`edit-server.component.ts`
+
+`can-deactivate-guard.service.ts`
+
+`app-routing.module.ts`
+
+`app.module.ts`
+
+
+
+### Passing static data to route
+
+1. generate `error-page component ` and modify `error-page.component.ts` and `error-page.component.html`
+
+
+
+```typescript
+
+// error-page.component.html
+<h4>{{ errorMessage }}</h4>
+
+
+
+// error-page.component.ts
+export class ErrorPageComponent implements OnInit {
+  errorMessage: string;
+
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    // this.errorMessage = this.route.snapshot.data["message"];
+
+    this.route.data.subscribe((data: Data) => {
+      this.errorMessage = data["message"];
+    });
+  }
+}
+
+```
+
+
+
+2. change corresponding routes in the `app-routing.module.ts`
+
+```typescript
+
+{
+    path: "not-found",
+    component: ErrorPageComponent,
+    data: { message: "Page not found!" },
+  },
+    
+```
+
+
+
+
+
+### Resolving Dynamic Data with the resolve guard
+
+.......
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
