@@ -99,5 +99,68 @@ export class DropdownDirective {
 
 
 
+### Services and Dependency Injection
+
+
+
+**deal with recipes**
+
+
+
+1. create `recipe.service.ts` under `recipes`
+2. bring `recipeService` to `recipes.component.ts` as a provider 
+3. update `recipes` in the `recipe-list.component.ts`ßß
+
+
+
+use of `EventEmitter` in the services
+
+4. add `recipeSelected = new EventEmitter<Recipe>();` to `recipe.service.ts`
+
+5. in the `recipe-item.component.ts` , emit selected recipe directly
+
+   
+
+```typescript
+
+onSelected() {
+    // this.fireSelectedRecipe.emit();
+    this.recipeService.recipeSelected.emit(this.recipe);
+  }
+
+```
+
+
+
+5. in the `recipes.component.ts`, get the selected recipe directly
+
+```typescript
+
+  ngOnInit(): void {
+    this.recipeService.recipeSelected.subscribe((recipe: Recipe) => {
+      this.selectedRecipe = recipe;
+    });
+  }
+  
+```
+
+
+
+
+
+**deal with Ingredient**
+
+1. Create `shoppingList.service.ts`
+2. Update `shopping-list.component.ts`
+3. update `shopping-edit.component.ts`
+
+
+
+**add recipe ingredient in the `recipe-detail.component` to `shopping list`**
+
+1. Modify `recipe-detail.component.ts` (add `  onAddToShoppingList`)
+2. add `  addIngredientsToShoppingList` in the `recipe.service.ts`
+3. add `  addIngredients` in the `shoppingList.service.ts`
+
 
 
