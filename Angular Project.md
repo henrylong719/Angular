@@ -164,3 +164,26 @@ onSelected() {
 
 
 
+### Routing
+
+<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-26 at 10.06.23 am.png" alt="Screen Shot 2021-03-26 at 10.06.23 am" style="zoom:50%;" />
+
+
+
+1. create `app-routing.module.ts` and bring it to the `app.module.ts`
+2. modify `app.component.html` (add `router-outlet`)
+3. deactive all the links
+
+**Add child route**
+
+4. Modify `app-routing.module.ts`
+5. modify `recipes.component.html`
+6. modify `recipe-detail.component.ts`  and add `getRecipe` to `recipe.service.ts`
+7. get the index of recipe-item by modifying `recipe-list.component.html` and `recipe-item.component.ts` as well as `recipe-item.component.html`
+8. add `recipe-edit component` and bring it to the `app-routing.module.ts`
+9. modify `recipe-edit component`
+
+
+
+
+

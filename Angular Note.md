@@ -372,7 +372,7 @@ export class ServerComponent{
 
 <!-- server.component.html  -->
 
-<app-server *ngFor="let server of servers"></app-server>
+<app-server *ngFor="let server of servers let i = index"></app-server>
 
 
 ```
@@ -1971,11 +1971,15 @@ export class CounterService {
 
 ### set up routes
 
+(read move out route module)
+
 1. In the `app.module.ts`
 
 ```typescript
 
 const appRoutes: Routes = [
+  { path: "", redirectTo: "/home", pathMatch: "full" },
+  { path: "home", component: HomeComponent },
   { path: "", component: HomeComponent },
   { path: "users", component: UserComponent },
   { path: "servers", component: ServerComponent },
@@ -2129,7 +2133,7 @@ export class UserComponent implements OnInit, OnDestroy {
 
     // need to add an observable if there might be changes in the current page
     this.paramsSubscription = this.route.params.subscribe((params: Params) => {
-      this.user.id = params.id;
+      this.user.id = +params['id'];
       this.user.name = params.name;
     });
   }
@@ -2207,12 +2211,6 @@ export class UserComponent implements OnInit, OnDestroy {
   }
 
 ```
-
-
-
-
-
-
 
 
 
@@ -2321,31 +2319,6 @@ const appRoutes: Routes = [
 
 ```typescript
 
-// app.module.ts
-
-@NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    UsersComponent,
-    ServersComponent,
-    UserComponent,
-    EditServerComponent,
-    ServerComponent,
-    PageNotFoundComponent,
-  ],
-  imports: [BrowserModule, FormsModule, AppRoutingModule],
-  providers: [ServersService],
-  bootstrap: [AppComponent],
-})
-export class AppModule {}
-
-```
-
-
-
-```typescript
-
 // app-routing.module.ts
 
 const appRoutes: Routes = [
@@ -2376,6 +2349,32 @@ const appRoutes: Routes = [
 export class AppRoutingModule {}
 
 ```
+
+
+
+```typescript
+
+// app.module.ts
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    UsersComponent,
+    ServersComponent,
+    UserComponent,
+    EditServerComponent,
+    ServerComponent,
+    PageNotFoundComponent,
+  ],
+  imports: [BrowserModule, FormsModule, AppRoutingModule],
+  providers: [ServersService],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+```
+
+
 
 
 
@@ -2460,8 +2459,6 @@ export class ErrorPageComponent implements OnInit {
 ### Resolving Dynamic Data with the resolve guard
 
 .......
-
-
 
 
 
