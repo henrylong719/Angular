@@ -4,13 +4,16 @@
   </div>
 
   <div class="col-md-7">
-    <app-recipe-detail
-      *ngIf="selectedRecipe; else noRecipe"
-      [recipe]="selectedRecipe"
-    ></app-recipe-detail>
-
-    <ng-template #noRecipe><p>Please select a Recipe!</p></ng-template>
+    <router-outlet></router-outlet>
   </div>
 </div>
 
 <!-- (fireSelectedRecipeFromList)="onReceiveRecipe($event)" -->
+
+<!-- <app-recipe-detail
+*ngIf="selectedRecipe; else noRecipe"
+[recipe]="selectedRecipe"
+></app-recipe-detail>
+
+<ng-template #noRecipe><p>Please select a Recipe!</p></ng-template>
+</div> -->
