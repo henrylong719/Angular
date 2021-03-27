@@ -2,6 +2,494 @@
 
 
 
+## Routing
+
+### set up routes
+
+(read move out route module)
+
+1. In the `app.module.ts`
+
+```typescript
+const appRoutes: Routes = [
+  { path: "", redirectTo: "/home", pathMatch: "full" },
+  { path: "home", component: HomeComponent },
+  { path: "", component: HomeComponent },
+  { path: "users", component: UserComponent },
+  { path: "servers", component: ServerComponent },
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    UsersComponent,
+    ServersComponent,
+    UserComponent,
+    EditServerComponent,
+    ServerComponent,
+  ],
+  imports: [BrowserModule, FormsModule, RouterModule.forRoot(appRoutes)],
+  providers: [ServersService],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+
+```
+
+
+
+2. in the `app.component.html`
+
+```html
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <ul class="nav nav-tabs">
+        <li
+          role="presentation"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <a [routerLink]="['/']">Home</a>
+        </li>
+        <li role="presentation" routerLinkActive="active">
+          <a routerLink="/servers">Servers</a>
+        </li>
+        <li role="presentation" routerLinkActive="active">
+          <a [routerLink]="['/users']">Users</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
+
+
+```
+
+
+
+### Navigating Programmatically
+
+```typescript
+// home.component.ts
+
+export class HomeComponent implements OnInit {
+  constructor(private router: Router) {}
+
+  ngOnInit() {}
+
+  onLoadServers() {
+    //complex calculation
+    this.router.navigate(["/servers"]);
+  }
+}
+
+```
+
+
+
+**use relative path**
+
+
+
+```typescript
+// servers.component.ts
+
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { ServersService } from "./servers.service";
+
+@Component({
+  selector: "app-servers",
+  templateUrl: "./servers.component.html",
+  styleUrls: ["./servers.component.css"],
+})
+export class ServersComponent implements OnInit {
+  public servers: { id: number; name: string; status: string }[] = [];
+
+  constructor(
+    private serversService: ServersService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit() {
+    this.servers = this.serversService.getServers();
+  }
+
+  onReload() {
+    // relativeTo: (current page)
+    this.router.navigate(["servers"], { relativeTo: this.route });
+  }
+}
+
+```
+
+
+
+### Pass parameters to routes
+
+1. add `  { path: "users/:id/:name", component: UserComponent },` to `appRoutes` in the `app.module.ts`
+2. in the `user.component.ts`, add functions to get parameters
+
+```typescript
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, Params } from "@angular/router";
+import { Subscription } from "rxjs";
+
+@Component({
+  selector: "app-user",
+  templateUrl: "./user.component.html",
+  styleUrls: ["./user.component.css"],
+})
+export class UserComponent implements OnInit, OnDestroy {
+  user: { id: number; name: string };
+  paramsSubscription: Subscription;
+
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    this.user = {
+      // snapshot can only work when entering from other different pages
+      id: this.route.snapshot.params["id"],
+      name: this.route.snapshot.params["name"],
+    };
+
+    // need to add an observable if there might be changes in the current page
+    this.paramsSubscription = this.route.params.subscribe((params: Params) => {
+      this.user.id = +params['id'];
+      this.user.name = params.name;
+    });
+  }
+
+  // for the params subscription, no need to unsubscribe (angular will do it automatically) but own defined observable needs to
+  // be unsubscribed
+  ngOnDestroy() {
+    this.paramsSubscription.unsubscribe();
+  }
+}
+
+```
+
+
+
+### Query Parameters and Fragments
+
+
+
+**Passing Query Parameters and Fragments**
+
+1. add ` { path: "servers/:id/edit", component: ServersComponent },` to `app.module.ts`
+
+
+
+​	**Add query parameters in the link**
+
+2. in the `servers.component.ts`
+
+```typescript
+<div class="row">
+  <div class="col-xs-12 col-sm-4">
+    <div class="list-group">
+      <a
+        [routerLink]="['/servers', 5, 'edit']"
+        [queryParams]="{ allowEdit: '1' }"
+        fragment="loading"
+        href="#"
+        class="list-group-item"
+        *ngFor="let server of servers"
+      >
+        {{ server.name }}
+      </a>
+    </div>
+  </div>
+  <div class="col-xs-12 col-sm-4">
+    <button class="btn btn-primary" (click)="onReload()">Reload Page</button>
+    <app-edit-server></app-edit-server>
+    <hr />
+    <app-server></app-server>
+  </div>
+</div>
+
+```
+
+
+
+​	**Add query parameters programmatically**
+
+
+
+3. 
+
+```typescript
+ onLoadServer(id: number) {
+    //complex calculation
+    // this.router.navigate(["/servers"]);
+
+    this.router.navigate(["/servers", id, "edit"], {
+      queryParams: { allowEdit: "1" },
+      fragment: "loading",
+    });
+  }
+
+```
+
+
+
+3. in the `edit-server.component.ts`
+
+```typescript
+  ngOnInit() {
+    console.log(this.route.snapshot.queryParams);
+    console.log(this.route.snapshot.fragment);
+
+    // or
+    this.route.queryParams.subscribe((query) => {
+      console.log(query);
+    });
+
+    this.route.fragment.subscribe((frag) => {
+      console.log(frag);
+    });
+
+    this.server = this.serversService.getServer(1);
+    this.serverName = this.server.name;
+    this.serverStatus = this.server.status;
+  }
+
+```
+
+
+
+### Child (Nested) Routes
+
+
+
+```typescript
+// app.module.ts
+
+const appRoutes: Routes = [
+  { path: "", component: HomeComponent },
+  {
+    path: "users",
+    component: UsersComponent,
+    children: [{ path: ":id/:name", component: UserComponent }],
+  },
+
+  {
+    path: "servers",
+    component: ServersComponent,
+    children: [
+      { path: ":id", component: ServerComponent },
+      { path: ":id/edit", component: EditServerComponent },
+    ],
+  },
+];
+```
+
+
+
+In the `users.component.html` and `servers.component.html`, use ` <router-outlet></router-outlet>` in the corresponding area.
+
+
+
+### Maintain the parameters in the url
+
+In the `server.component.ts`
+
+```typescript
+
+  onEdit() {
+    this.router.navigate(["edit"], {
+      relativeTo: this.route,
+      queryParamsHandling: "preserve",
+    });
+  }
+```
+
+
+
+### Redirecting and Wildcard Routes (random URL)
+
+
+
+```typescript
+const appRoutes: Routes = [
+  { path: "", redirectTo: "/home", pathMatch: "full" },
+  { path: "home", component: HomeComponent },
+  {
+    path: "users",
+    component: UsersComponent,
+    children: [{ path: ":id/:name", component: UserComponent }],
+  },
+  
+  // put it in the last
+  { path: "not-found", component: PageNotFoundComponent },
+  { path: "**", redirectTo: "/not-found" },
+];
+```
+
+
+
+### Move out route module
+
+
+
+```typescript
+// app-routing.module.ts
+
+const appRoutes: Routes = [
+  { path: "", redirectTo: "/home", pathMatch: "full" },
+  { path: "home", component: HomeComponent },
+  {
+    path: "users",
+    component: UsersComponent,
+    children: [{ path: ":id/:name", component: UserComponent }],
+  },
+
+  {
+    path: "servers",
+    component: ServersComponent,
+    children: [
+      { path: ":id", component: ServerComponent },
+      { path: ":id/edit", component: EditServerComponent },
+    ],
+  },
+  { path: "not-found", component: PageNotFoundComponent },
+  { path: "**", redirectTo: "/not-found" },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(appRoutes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
+
+```
+
+
+
+```typescript
+// app.module.ts
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    UsersComponent,
+    ServersComponent,
+    UserComponent,
+    EditServerComponent,
+    ServerComponent,
+    PageNotFoundComponent,
+  ],
+  imports: [BrowserModule, FormsModule, AppRoutingModule],
+  providers: [ServersService],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+```
+
+
+
+
+
+
+
+### Protecting Routes with canActive
+
+**source code**
+
+`auth-guard.service.ts`
+
+`auth.service.ts`
+
+`app.module.ts`
+
+`home.component.html`
+
+`home.component.ts`
+
+
+
+### Controlling Navigation with canDeactivate
+
+`edit-server.component.ts`
+
+`can-deactivate-guard.service.ts`
+
+`app-routing.module.ts`
+
+`app.module.ts`
+
+
+
+### Passing static data to route
+
+1. generate `error-page component ` and modify `error-page.component.ts` and `error-page.component.html`
+
+
+
+```typescript
+// error-page.component.html
+<h4>{{ errorMessage }}</h4>
+
+
+
+// error-page.component.ts
+export class ErrorPageComponent implements OnInit {
+  errorMessage: string;
+
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    // this.errorMessage = this.route.snapshot.data["message"];
+
+    this.route.data.subscribe((data: Data) => {
+      this.errorMessage = data["message"];
+    });
+  }
+}
+
+```
+
+
+
+2. change corresponding routes in the `app-routing.module.ts`
+
+```typescript
+{
+    path: "not-found",
+    component: ErrorPageComponent,
+    data: { message: "Page not found!" },
+  },
+    
+```
+
+
+
+
+
+### Resolving Dynamic Data with the resolve guard
+
+.......
+
+
+
+
+
+
+
+
+
+
+
 ## Observable
 
 <img src="/Users/henrylong/Angular/Angular/images/observable.png" alt="observable" style="zoom:50%;" />
@@ -304,6 +792,1021 @@ For the `onActivated` in the `user.component.ts` , replace `emit()` with `next()
   }
 
 ```
+
+
+
+## Forms
+
+<img src="/Users/henrylong/Angular/Angular/images/form.png" alt="form" style="zoom:50%;" />
+
+
+
+
+
+<img src="/Users/henrylong/Angular/Angular/images/form2.png" alt="form2" style="zoom:50%;" />
+
+
+
+### Template-Driven
+
+
+
+```html
+
+<!-- app.component.html  -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <form (ngSubmit)="onSubmit()" #f="ngForm">
+        <!-- method 2 form (ngSubmit)="onSubmit(f)" #f="ngForm" -->
+        <div id="user-data">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              class="form-control"
+              name="username"
+              ngModel
+            />
+          </div>
+          <button class="btn btn-default" type="button">
+            Suggest an Username
+          </button>
+          <div class="form-group">
+            <label for="email">Mail</label>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              name="email"
+              ngModel
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="secret">Secret Questions</label>
+          <select id="secret" class="form-control" name="secret" ngModel>
+            <option value="pet">Your first Pet?</option>
+            <option value="teacher">Your first teacher?</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+```
+
+
+
+```typescript
+
+// app.component.ts
+
+export class AppComponent {
+  // method 1
+  @ViewChild("f") signupForm: NgForm;
+
+  suggestUserName() {
+    const suggestedName = "Superuser";
+  }
+
+  // method 1
+  onSubmit() {
+    console.log(this.signupForm);
+  }
+
+  // method 2
+  // onSubmit(form: NgForm) {
+  //   console.log(form);
+  // }
+}
+
+```
+
+
+
+### Built-in Validators & Using HTML5 Validation
+
+
+
+Which Validators do ship with Angular? 
+
+Check out the Validators class: https://angular.io/api/forms/Validators - these are all built-in validators, though that are the methods which actually get executed (and which you later can add when using the reactive approach).
+
+For the template-driven approach, you need the directives. You can find out their names, by searching for "validator" in the official docs: https://angular.io/api?type=directive - everything marked with "D" is a directive and can be added to your template.
+
+Additionally, you might also want to enable HTML5 validation (by default, Angular disables it). You can do so by adding the `ngNativeValidate` to a control in your template.
+
+
+
+```html
+
+<!-- app.component.html  -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <form (ngSubmit)="onsubmit()" #f="ngForm">
+        <!-- method 2 form (ngSubmit)="onSubmit(f)" #f="ngForm" -->
+        <div id="user-data" ngModelGroup="userData" #userData="ngModelGroup">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              class="form-control"
+              name="username"
+              ngModel
+              required
+            />
+          </div>
+          <button
+            class="btn btn-default"
+            type="button"
+            (click)="suggestUserName()"
+          >
+            Suggest an Username
+          </button>
+          <div class="form-group">
+            <label for="email">Mail</label>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              name="email"
+              ngModel
+              required
+              email
+              #email="ngModel"
+            />
+            <span class="help-block" *ngIf="!email.valid && email.touched"
+              >Please enter a valid email</span
+            >
+          </div>
+        </div>
+        <p *ngIf="!userData.valid">User Data is invalid</p>
+        
+        <div class="form-group">
+          <label for="secret">Secret Questions</label>
+          <select
+            id="secret"
+            class="form-control"
+            name="secret"
+            [ngModel]="defaultQuestion"
+          >
+            <option value="pet">Your first Pet?</option>
+            <option value="teacher">Your first teacher?</option>
+          </select>
+        </div>
+        
+        <!-- from assignment  -->
+        <div class="form-group">
+         <select
+              name="subscription"
+              id="subscription"
+              class="form-control"
+              ngModel
+              #subscription="ngModel"
+              [ngModel]="defaultSubscription"
+            >
+              <option
+                *ngFor="let subscription of subscriptions"
+                [value]="subscription"
+              >
+                {{ subscription }}
+              </option>
+            </select>
+         </div>
+        
+        <div class="form-group">
+          <textarea
+            name="questionAnswer"
+            cols="105"
+            rows="10"
+            [(ngModel)]="answer"
+          ></textarea>
+        </div>
+        <p>Your answer: {{ answer }}</p>
+        <div class="radio" *ngFor="let gender of genders">
+          <label>
+            <input
+              type="radio"
+              name="gender"
+              [ngModel]="defaultGender"
+              [value]="gender"
+              required
+            />
+            {{ gender }}
+          </label>
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="!f.valid">
+          Submit
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<hr />
+
+<div class="row" *ngIf="submitted">
+  <div class="col-xs-12">
+    <h3>Your Data</h3>
+    <p>Username:{{ user.username }}</p>
+    <p>Mail:{{ user.email }}</p>
+    <p>Secret Question: Your first {{ user.secretQuestion }}</p>
+    <p>Answer:{{ user.answer }}</p>
+    <p>Gender: {{ user.gender }}</p>
+  </div>
+</div>
+
+```
+
+
+
+
+
+```typescript
+
+// app.component.ts
+
+import { Component, ViewChild } from "@angular/core";
+import { NgForm } from "@angular/forms";
+
+@Component({
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"],
+})
+export class AppComponent {
+  // method 1
+  @ViewChild("f") signupForm: NgForm;
+
+  genders = ["male", "female"];
+  answer = "";
+  defaultQuestion = "pet";
+  defaultGender = this.genders[0];
+  submitted = false;
+
+  user = {
+    username: "",
+    email: "",
+    secretQuestion: "",
+    answer: "",
+    gender: "",
+  };
+
+  suggestUserName() {
+    const suggestedName = "Superuser";
+
+    // setValue: set the whole form
+    // this.signupForm.setValue({
+    //   userData: {
+    //     username: suggestedName,
+    //     email: "",
+    //   },
+
+    //   secret: "pet",
+    //   questionAnswer: "",
+    //   gender: "male",
+    // });
+
+    // patchValue: overrides parts of the form
+
+    this.signupForm.form.patchValue({
+      userData: {
+        username: suggestedName,
+        email: "dsfdsf@dfsfds",
+      },
+      gender: "male",
+    });
+  }
+
+  // method 1
+  // onSubmit() {
+  //   console.log(this.signupForm);
+  // }
+
+  // method 2
+  // onSubmit(form: NgForm) {
+  //   console.log(form);
+  // }
+
+  onsubmit() {
+    this.submitted = true;
+    this.user.username = this.signupForm.value.userData.username;
+    this.user.email = this.signupForm.value.userData.email;
+    this.user.secretQuestion = this.signupForm.value.userData.secret;
+    this.user.answer = this.signupForm.value.questionAnswer;
+    this.user.gender = this.signupForm.value.gender;
+
+    this.signupForm.reset();
+  }
+}
+
+
+```
+
+
+
+
+
+```css
+
+/* app.component.css */
+
+form .ng-invalid.ng-touched {
+  border: 1px solid red;
+}
+
+```
+
+
+
+**Example 2 from assignment**
+
+```html
+
+<!-- app.component.html -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <form #signupForm="ngForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="email"> Email: </label>
+
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-control"
+            required
+            email
+            ngModel
+            #email="ngModel"
+          />
+          <span class="help-block" *ngIf="!email.valid && email.touched"
+            >Please enter a valid email</span
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password"> Password: </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-control"
+            required
+            ngModel
+            #password="ngModel"
+          />
+
+          <span class="help-block" *ngIf="!password.valid && password.touched"
+            >Please enter a valid password</span
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="subscriptions"></label>
+
+          <select
+            name="subscription"
+            id="subscription"
+            class="form-control"
+            ngModel
+            #subscription="ngModel"
+            [ngModel]="defaultSubscription"
+          >
+            <option
+              *ngFor="let subscription of subscriptions"
+              [value]="subscription"
+            >
+              {{ subscription }}
+            </option>
+          </select>
+        </div>
+
+        <p *ngIf="!signupForm.valid && signupForm.touched">
+          User Data is invalid
+        </p>
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+```
+
+
+
+
+
+```typescript
+
+// app.component.ts
+
+export class AppComponent {
+  @ViewChild("signupForm") sgnForm: NgForm;
+
+  subscriptions = ["Basic", "Advanced", "Pro"];
+
+  defaultSubscription = "Advanced";
+
+  onSubmit() {
+    console.log(this.sgnForm.value.email);
+    console.log(this.sgnForm.value.password);
+    console.log(this.sgnForm.value.subscription);
+  }
+}
+
+```
+
+
+
+
+
+### Reactive
+
+1. Import `ReactiveFormsModule` in the `app.module.ts`
+
+
+
+```html
+
+
+<!-- app.component.html  -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <!-- connect form to the signupForm -->
+      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <!-- connect username -->
+          <input
+            type="text"
+            id="username"
+            class="form-control"
+            formControlName="username"
+          />
+          <span
+            *ngIf="
+              !signupForm.get('username').valid &&
+              signupForm.get('username').touched
+            "
+            class="help-block"
+            >Please enter a valid username!</span
+          >
+        </div>
+        <div class="form-group">
+          <label for="email">email</label>
+          <input
+            type="text"
+            id="email"
+            class="form-control"
+            formControlName="email"
+          />
+          <span
+            *ngIf="
+              !signupForm.get('email').valid && signupForm.get('email').touched
+            "
+            class="help-block"
+            >Please enter a valid email!</span
+          >
+        </div>
+        <div class="radio" *ngFor="let gender of genders">
+          <label>
+            <input type="radio" [value]="gender" formControlName="gender" />{{
+              gender
+            }}
+          </label>
+        </div>
+        <span *ngIf="!signupForm.valid && signupForm.touched" class="help-block"
+          >Please enter a valid data!</span
+        >
+
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+```
+
+
+
+```typescript
+
+// app.component.ts
+
+import { Component, OnInit } from "@angular/core";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
+
+@Component({
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"],
+})
+export class AppComponent implements OnInit {
+  genders = ["male", "female"];
+  signupForm: FormGroup;
+
+  ngOnInit() {
+    this.signupForm = new FormGroup({
+      // new FormControl(default value, validators)
+
+      username: new FormControl(null, Validators.required),
+      email: new FormControl(null, [Validators.required, Validators.email]),
+
+      gender: new FormControl("male"),
+    });
+  }
+  onSubmit() {
+    console.log("tes");
+    console.log(this.signupForm);
+  }
+}
+
+```
+
+
+
+
+
+**Form group**
+
+
+
+```html
+
+<!-- app.component.ts  -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <!-- connect form to the signupForm -->
+      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+        <div formGroupName="userData">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <!-- connect username -->
+            <input
+              type="text"
+              id="username"
+              class="form-control"
+              formControlName="username"
+            />
+            <span
+              *ngIf="
+                !signupForm.get('userData.username').valid &&
+                signupForm.get('userData.username').touched
+              "
+              class="help-block"
+              >Please enter a valid username!</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="email">email</label>
+            <input
+              type="text"
+              id="email"
+              class="form-control"
+              formControlName="email"
+            />
+            <span
+              *ngIf="
+                !signupForm.get('userData.email').valid &&
+                signupForm.get('userData.email').touched
+              "
+              class="help-block"
+              >Please enter a valid email!</span
+            >
+          </div>
+        </div>
+
+        <div class="radio" *ngFor="let gender of genders">
+          <label>
+            <input type="radio" [value]="gender" formControlName="gender" />{{
+              gender
+            }}
+          </label>
+        </div>
+
+        <div formArrayName="hobbies">
+          <h4>Your Hobbies</h4>
+          <button class="btn btn-default" type="button" (click)="onAddHobby()">
+            Add Hobby
+          </button>
+
+          <div
+            class="form-group"
+            *ngFor="let hobbyControl of getControls(); let i = index"
+          >
+            <input type="text" class="form-control" [formControlName]="i" />
+          </div>
+        </div>
+
+        <span *ngIf="!signupForm.valid && signupForm.touched" class="help-block"
+          >Please enter a valid data!</span
+        >
+
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+```
+
+
+
+
+
+```typescript
+
+// app.component.ts
+
+export class AppComponent implements OnInit {
+  genders = ["male", "female"];
+  signupForm: FormGroup;
+
+  ngOnInit() {
+    this.signupForm = new FormGroup({
+      userData: new FormGroup({
+        // new FormControl(default value, validators)
+        username: new FormControl(null, Validators.required),
+        email: new FormControl(null, [Validators.required, Validators.email]),
+      }),
+
+      gender: new FormControl("male"),
+      hobbies: new FormArray([]),
+    });
+  }
+  onSubmit() {
+    console.log("tes");
+    console.log(this.signupForm);
+  }
+
+  getControls() {
+    return (<FormArray>this.signupForm.get("hobbies")).controls;
+  }
+
+  onAddHobby() {
+    const control = new FormControl(null, Validators.required);
+    (<FormArray>this.signupForm.get("hobbies")).push(control);
+  }
+}
+
+```
+
+
+
+**create custom validators**
+
+```typescript
+
+export class AppComponent implements OnInit {
+  genders = ["male", "female"];
+  signupForm: FormGroup;
+
+  // 1. add forbiddenUsernames array
+  forbiddenUsernames = ["Chris", "Andia"];
+
+  ngOnInit() {
+    this.signupForm = new FormGroup({
+      userData: new FormGroup({
+        // new FormControl(default value, validators)
+        // 3. bring forbiddenNames to username validators
+        username: new FormControl(null, [
+          Validators.required,
+          this.forbiddenNames.bind(this),
+        ]),
+        email: new FormControl(null, [Validators.required, Validators.email]),
+      }),
+
+      gender: new FormControl("male"),
+      hobbies: new FormArray([]),
+    });
+  }
+
+  // 2. add corresponding method
+  forbiddenNames(control: FormControl): { [s: string]: boolean } {
+    if (this.forbiddenUsernames.indexOf(control.value) !== -1) {
+      return { nameIsForbidden: true };
+    }
+    return null;
+  }
+}
+
+```
+
+
+
+
+
+```html
+
+
+<!-- app.component.html  -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <!-- connect form to the signupForm -->
+      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+        <div formGroupName="userData">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <!-- connect username -->
+            <input
+              type="text"
+              id="username"
+              class="form-control"
+              formControlName="username"
+            />
+            <span
+              *ngIf="
+                !signupForm.get('userData.username').valid &&
+                signupForm.get('userData.username').touched
+              "
+              class="help-block"
+            >
+              <span
+                *ngIf="
+                  signupForm.get('userData.username').errors['nameIsForbidden']
+                "
+                >This name is invalid</span
+              >
+
+              <span
+                *ngIf="signupForm.get('userData.username').errors['required']"
+                >This field is invalid</span
+              >
+            </span>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+
+```
+
+
+
+**Add Async Validator**
+
+```typescript
+
+// 1. create forbiddenEmails function
+
+  forbiddenEmails(control: FormControl): Promise<any> | Observable<any> {
+    const promise = new Promise<any>((resolve, reject) => {
+      setTimeout(() => {
+        if (control.value === "test@test.com") {
+          resolve({ emailIsForbidden: true });
+        } else {
+          resolve(null);
+        }
+      }, 1500);
+    });
+    return promise;
+  }
+  
+  
+  
+// 2.bring it to the email object
+    email: new FormControl(
+          null,
+          [Validators.required, Validators.email],
+          this.forbiddenEmails
+		),
+      
+```
+
+
+
+```typescript
+
+// app.component.ts
+
+export class AppComponent implements OnInit {
+  genders = ["male", "female"];
+  signupForm: FormGroup;
+
+  // 1. add forbiddenUsernames array
+  forbiddenUsernames = ["Chris", "Andia"];
+
+  ngOnInit() {
+    this.signupForm = new FormGroup({
+      userData: new FormGroup({
+        // new FormControl(default value, validators)
+        // 3. bring forbiddenNames to username validators
+        username: new FormControl(null, [
+          Validators.required,
+          this.forbiddenNames.bind(this),
+        ]),
+        email: new FormControl(
+          null,
+          [Validators.required, Validators.email],
+          this.forbiddenEmails
+        ),
+      }),
+
+      gender: new FormControl("male"),
+      hobbies: new FormArray([]),
+    });
+
+    // this.signupForm.valueChanges.subscribe((value) => console.log(value));
+    this.signupForm.statusChanges.subscribe((status) => console.log(status));
+
+    // this.signupForm.setValue({
+    //   userData: {
+    //     username: "Max",
+    //     email: "max@test.com",
+    //   },
+    //   gender: "male",
+    //   hobbies: [],
+    // });
+
+    this.signupForm.patchValue({
+      userData: {
+        username: "Anna",
+      },
+    });
+  }
+
+  onSubmit() {
+    console.log("tes");
+    console.log(this.signupForm);
+
+    this.signupForm.reset();
+  }
+}
+
+```
+
+
+
+**Example 2**
+
+```html
+
+<!-- app.component.html -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <form [formGroup]="projectForm" (ngSubmit)="onSaveProject()">
+        <div class="form-group">
+          <label for="name"> Project Name: </label>
+
+          <input
+            type="name"
+            name="name"
+            id="name"
+            class="form-control"
+            formControlName="projectName"
+          />
+
+          <span
+            *ngIf="
+              !projectForm.get('projectName').valid &&
+              projectForm.get('projectName').touched
+            "
+          >
+            Please enter a valid project name
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="email"> Mail: </label>
+
+          <input
+            type="email"
+            name="email"
+            id="email"
+            class="form-control"
+            formControlName="email"
+          />
+
+          <span
+            *ngIf="
+              !projectForm.get('email').valid &&
+              projectForm.get('email').touched
+            "
+          >
+            Please enter a valid project name
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Project status</label>
+          <select
+            id="status"
+            formControlName="projectStatus"
+            class="form-control"
+          >
+            <option *ngFor="let status of projectStatus" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+```
+
+
+
+```typescript
+
+// app.component.ts
+
+import { Component, OnInit } from "@angular/core";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
+
+import { CustomValidators } from "./custom-validators";
+
+@Component({
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"],
+})
+export class AppComponent implements OnInit {
+  projectForm: FormGroup;
+  projectStatus = ["Stable", "Critical", "Finished"];
+
+  ngOnInit() {
+    this.projectForm = new FormGroup({
+      projectName: new FormControl(
+        null,
+        [Validators.required, CustomValidators.invalidProjectName],
+        CustomValidators.asyncInvalidProjectName
+      ),
+      email: new FormControl(null, [Validators.required, Validators.email]),
+      projectStatus: new FormControl("Critical"),
+    });
+  }
+
+  onSaveProject() {
+    console.log(this.projectForm.value);
+  }
+}
+
+```
+
+
+
+```typescript
+
+// custom-validators.ts
+
+import { FormControl } from "@angular/forms";
+import { Observable } from "rxjs/Observable";
+
+export class CustomValidators {
+  static invalidProjectName(control: FormControl): { [s: string]: boolean } {
+    if (control.value === "Test") {
+      return { invalidProjectName: true };
+    }
+    return null;
+  }
+
+  static asyncInvalidProjectName(
+    control: FormControl
+  ): Promise<any> | Observable<any> {
+    const promise = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (control.value === "Testproject") {
+          resolve({ invalidProjectName: true });
+        } else {
+          resolve(null);
+        }
+      }, 2000);
+    });
+    return promise;
+  }
+}
+
+```
+
+
 
 
 

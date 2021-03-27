@@ -1,0 +1,64 @@
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <form [formGroup]="projectForm" (ngSubmit)="onSaveProject()">
+        <div class="form-group">
+          <label for="name"> Project Name: </label>
+
+          <input
+            type="name"
+            name="name"
+            id="name"
+            class="form-control"
+            formControlName="projectName"
+          />
+
+          <span
+            *ngIf="
+              !projectForm.get('projectName').valid &&
+              projectForm.get('projectName').touched
+            "
+          >
+            Please enter a valid project name
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="email"> Mail: </label>
+
+          <input
+            type="email"
+            name="email"
+            id="email"
+            class="form-control"
+            formControlName="email"
+          />
+
+          <span
+            *ngIf="
+              !projectForm.get('email').valid &&
+              projectForm.get('email').touched
+            "
+          >
+            Please enter a valid project name
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Project status</label>
+          <select
+            id="status"
+            formControlName="projectStatus"
+            class="form-control"
+          >
+            <option *ngFor="let status of projectStatus" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
