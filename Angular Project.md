@@ -185,5 +185,18 @@ onSelected() {
 
 
 
+### Forms
+
+**Template Driven approach**
+
+1. edit `shopping-edit.component.html` and `shopping-edit.component.ts` to use angular form
+2. implement the edit function
+   1. add `startEditing = new Subject<number>();` and `addIngredient` in the `shoppingList.service.ts` 
+   2. emit selected item from `shopping list component` to `shopping-edit.component` by editing files in the two components
+
+**Reactive approach**
+
+1. `recipe-edit.component.html`
+
 
 

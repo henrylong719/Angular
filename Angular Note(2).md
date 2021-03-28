@@ -885,6 +885,22 @@ export class AppComponent {
   // }
 }
 
+
+/* or
+
+// shopping-edit.component.html
+
+<form (ngSubmit)="onAddItem(f)" #f="ngForm">
+
+// shopping-edit.component.ts
+
+onAddItem(form: NgForm) {
+    const value = form.value;
+    const newIngredient = new Ingredient(value.name, value.amount);
+  }
+}
+*/
+
 ```
 
 
