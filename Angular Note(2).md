@@ -1824,5 +1824,239 @@ export class CustomValidators {
 
 
 
+## Pipes
 
+
+
+Examples of using pipes
+
+
+
+```html
+{{ server.instanceType | uppercase }} 
+{{ server.started | date: "fullDate" | upppercase }}
+```
+
+
+
+ [Reference](https://angular.io/api?query=pipe)
+
+
+
+### Create custom pipes
+
+
+
+**Shoten Pipe**
+
+1. ceate `shorten.pipe.ts` or `ng g p shorten`
+
+```typescript
+
+import { Pipe, PipeTransform } from "@angular/core";
+
+@Pipe({
+  name: "shorten",
+})
+export class ShortenPipe implements PipeTransform {
+  transform(value: any, limit: number) {
+    if (value.length > limit) {
+      return value.substr(0, limit) + " ...";
+    }
+    return value;
+  }
+}
+
+```
+
+
+
+2. import pipe in the `declarations` of`app.module.ts`
+
+```typescript
+
+@NgModule({
+  declarations: [AppComponent, ShortenPipe],
+  imports: [BrowserModule, FormsModule],
+  providers: [],
+  bootstrap: [AppComponent],
+})
+```
+
+
+
+3. use pipe in the `app.component.html`
+
+```html
+
+ <strong>{{ server.name | shorten: 5 }}</strong>
+ 
+```
+
+
+
+
+
+**Filter Pipe**
+
+1. `ng g p filter`
+2. 
+
+```typescript
+
+// filter.pipe.ts
+
+import { Pipe, PipeTransform } from "@angular/core";
+
+@Pipe({
+  name: "filter",
+  // alow page to render in the filter
+  pure: false,
+})
+export class FilterPipe implements PipeTransform {
+  transform(value: any, filterString: string, propName: string): any {
+    if (value.length === 0 || !filterString) {
+      return value;
+    }
+
+    const resultArray = [];
+    for (const item of value) {
+      if (item[propName] === filterString) {
+        resultArray.push(item);
+      }
+    }
+    return resultArray;
+  }
+}
+
+```
+
+
+
+3. 
+
+```html
+
+<!-- app.component.html  -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+      <input type="text" [(ngModel)]="filteredStatus" />
+      <br />
+      <button class="btn btn-primary" (click)="onAddServer()">
+        Add Server
+      </button>
+
+      <hr />
+      <ul class="list-group">
+        <li
+          class="list-group-item"
+          *ngFor="let server of servers | filter: filteredStatus:'status'"
+          [ngClass]="getStatusClasses(server)"
+        >
+          <span class="badge">
+            {{ server.status }}
+          </span>
+          <strong>{{ server.name | shorten: 5 }}</strong> |
+          {{ server.instanceType | uppercase }} |
+          {{ server.started | date: "fullDate" | uppercase }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+```
+
+
+
+4. 
+
+```typescript
+
+// app.component.ts
+
+export class AppComponent {
+  servers = [
+    {
+      instanceType: "medium",
+      name: "Production Server",
+      status: "stable",
+      started: new Date(15, 1, 2017),
+    },
+    {
+      instanceType: "large",
+      name: "User Database",
+      status: "stable",
+      started: new Date(15, 1, 2017),
+    },
+    {
+      instanceType: "small",
+      name: "Development Server",
+      status: "offline",
+      started: new Date(15, 1, 2017),
+    },
+    {
+      instanceType: "small",
+      name: "Testing Environment Server",
+      status: "stable",
+      started: new Date(15, 1, 2017),
+    },
+  ];
+
+  filteredStatus = "";
+
+  getStatusClasses(server: {
+    instanceType: string;
+    name: string;
+    status: string;
+    started: Date;
+  }) {
+    return {
+      "list-group-item-success": server.status === "stable",
+      "list-group-item-warning": server.status === "offline",
+      "list-group-item-danger": server.status === "critical",
+    };
+  }
+
+  onAddServer() {
+    this.servers.push({
+      instanceType: "small",
+      name: "New Server",
+      status: "stable",
+      started: new Date(13, 1, 2020),
+    });
+  }
+}
+
+```
+
+
+
+
+
+### async pipe
+
+```html
+
+<!-- app.component.html  -->
+<h2>App Status: {{ appStatus | async }}</h2>
+
+```
+
+
+
+```typescript
+
+// app.component.ts
+
+appStatus = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve("stable");
+    }, 2000);
+  });
+
+```
 
