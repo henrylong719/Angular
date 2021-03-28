@@ -196,7 +196,9 @@ onSelected() {
 
 **Reactive approach**
 
-1. `recipe-edit.component.html`
+1. modify `recipe-edit.component.html`
+2. modify `recipe-edit.component.ts`
+3. modify `recipe.service.ts`
 
 
 
