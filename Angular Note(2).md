@@ -2060,3 +2060,200 @@ appStatus = new Promise((resolve, reject) => {
 
 ```
 
+
+
+## Making Http Requests
+
+
+
+<img src="/Users/henrylong/Angular/Angular/images/makingHttpRequest.png" alt="makingHttpRequest" style="zoom:45%;" />
+
+
+
+### Send requests
+
+
+
+1. import `HttpClientModule` in the `app.module.ts`
+
+```typescript
+import { HttpClientModule } from '@angular/common/http';
+...
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule, FormsModule, HttpClientModule],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+
+```
+
+
+
+2. send requests to firebase in `app.component.ts`
+
+```typescript
+
+// app.component.ts
+
+export class AppComponent implements OnInit {
+  loadedPosts: Post[] = [];
+
+  isFetching: boolean = false;
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.fetchPosts();
+  }
+
+  // post requests
+  onCreatePost(postData: { title: string; content: string }) {
+    // Send Http request
+    // request only sent when it is subscribed
+    this.http
+      .post<{ name: string }>(
+        "https://ng-guide-bc7ef-default-rtdb.firebaseio.com/posts.json",
+        postData
+      )
+      .subscribe((responseData) => {
+        console.log(responseData);
+      });
+  }
+
+  onFetchPosts() {
+    this.isFetching = true;
+    // Send Http request
+    this.fetchPosts();
+  }
+
+  onClearPosts() {
+    // Send Http request
+  }
+
+  // get requests
+  private fetchPosts() {
+    this.http
+      // indicate response body type
+      .get<{ [key: string]: Post }>(
+        "https://ng-guide-bc7ef-default-rtdb.firebaseio.com/posts.json"
+      )
+      .pipe(
+        map((responseData) => {
+          const postsArray: Post[] = [];
+
+          for (const key in responseData) {
+            if (responseData.hasOwnProperty(key)) {
+              postsArray.push({ ...responseData[key], id: key });
+            }
+          }
+          return postsArray;
+        })
+      )
+
+      .subscribe((posts) => {
+        this.isFetching = false;
+        this.loadedPosts = posts;
+      });
+  }
+}
+
+
+```
+
+
+
+```html
+
+<!-- app.component.html  -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+      <form #postForm="ngForm" (ngSubmit)="onCreatePost(postForm.value)">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input
+            type="text"
+            class="form-control"
+            id="title"
+            required
+            ngModel
+            name="title"
+          />
+        </div>
+        <div class="form-group">
+          <label for="content">Content</label>
+          <textarea
+            class="form-control"
+            id="content"
+            required
+            ngModel
+            name="content"
+          ></textarea>
+        </div>
+        <button
+          class="btn btn-primary"
+          type="submit"
+          [disabled]="!postForm.valid"
+        >
+          Send Post
+        </button>
+      </form>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+      <button class="btn btn-primary" (click)="onFetchPosts()">
+        Fetch Posts
+      </button>
+      |
+      <button
+        class="btn btn-danger"
+        [disabled]="loadedPosts.length < 1"
+        (click)="onClearPosts()"
+      >
+        Clear Posts
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+      <p *ngIf="loadedPosts.length < 1 && !isFetching">No posts available!</p>
+      <ul class="list-grooup" *ngIf="loadedPosts.length >= 1 && !isFetching">
+        <li class="list-group-item" *ngFor="let post of loadedPosts">
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.content }}</p>
+        </li>
+      </ul>
+      <p *ngIf="isFetching">loading...</p>
+    </div>
+  </div>
+</div>
+
+```
+
+
+
+```typescript
+
+// post.model.ts
+
+export interface Post {
+  title: string;
+  content: string;
+  // optional
+  id?: string;
+}
+
+```
+
+
+
+### Use service for http request
+
+
+
