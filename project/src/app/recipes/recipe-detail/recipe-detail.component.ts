@@ -34,7 +34,7 @@ export class RecipeDetailComponent implements OnInit {
     // this.recipe.ingredients.map((Ingredient) => {
     //   this.shoppingListService.addIngredient(Ingredient);
     // });
-    // this.recipeService.addIngredientsToShoppingList(this.recipe.ingredients);
+    this.recipeService.addIngredientsToShoppingList(this.recipe.ingredients);
   }
 
   onEditRecipe() {
