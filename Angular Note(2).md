@@ -2070,6 +2070,10 @@ appStatus = new Promise((resolve, reject) => {
 
 
 
+https://angular.io/guide/http
+
+
+
 ### Send requests
 
 
@@ -2255,5 +2259,382 @@ export interface Post {
 
 ### Use service for http request
 
+```html
 
+<!-- app.component.html -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+      <form #postForm="ngForm" (ngSubmit)="onCreatePost(postForm.value)">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input
+            type="text"
+            class="form-control"
+            id="title"
+            required
+            ngModel
+            name="title"
+          />
+        </div>
+        <div class="form-group">
+          <label for="content">Content</label>
+          <textarea
+            class="form-control"
+            id="content"
+            required
+            ngModel
+            name="content"
+          ></textarea>
+        </div>
+        <button
+          class="btn btn-primary"
+          type="submit"
+          [disabled]="!postForm.valid"
+        >
+          Send Post
+        </button>
+      </form>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+      <button class="btn btn-primary" (click)="onFetchPosts()">
+        Fetch Posts
+      </button>
+      |
+      <button
+        class="btn btn-danger"
+        [disabled]="loadedPosts.length < 1"
+        (click)="onClearPosts()"
+      >
+        Clear Posts
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+      <p *ngIf="loadedPosts.length < 1 && !isFetching">No posts available!</p>
+      <ul class="list-grooup" *ngIf="loadedPosts.length >= 1 && !isFetching">
+        <li class="list-group-item" *ngFor="let post of loadedPosts">
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.content }}</p>
+        </li>
+      </ul>
+      <p *ngIf="isFetching && !error">loading...</p>
+
+      <div class="alert alert-danger" *ngIf="error">
+        <h1>An error Occurs!</h1>
+        <p>{{ error }}</p>
+        <button class="btn btn-danger" (click)="onHandleError()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+```
+
+
+
+```typescript
+
+// app.component.ts
+
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Post } from "./post.model";
+import { PostService } from "./post.service";
+import { Subscription } from "rxjs";
+
+@Component({
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"],
+})
+export class AppComponent implements OnInit, OnDestroy {
+  loadedPosts: Post[] = [];
+
+  isFetching: boolean = false;
+
+  error = null;
+
+  private errorSub: Subscription;
+
+  constructor(private http: HttpClient, private postService: PostService) {}
+
+  ngOnInit() {
+    this.isFetching = true;
+    this.postService.fetchPosts().subscribe(
+      (posts) => {
+        this.isFetching = false;
+        this.loadedPosts = posts;
+      },
+      (error) => {
+        this.isFetching = false;
+        this.error = error.error.error;
+        console.log(error);
+      }
+    );
+  }
+
+  // post requests
+  onCreatePost(postData: Post) {
+    this.postService.createAndStorePost(postData.title, postData.content);
+
+    this.postService.errorMsg.subscribe((error) => {
+      this.isFetching = false;
+      this.error = error;
+
+      console.log(error);
+    });
+  }
+
+  onFetchPosts() {
+    this.isFetching = true;
+    this.postService.fetchPosts().subscribe(
+      (posts) => {
+        this.isFetching = false;
+        this.loadedPosts = posts;
+      },
+      (error) => {
+        this.isFetching = false;
+        this.error = error.message;
+      }
+    );
+  }
+
+  onClearPosts() {
+    // Send Http request
+
+    this.postService.deletePosts().subscribe(() => {
+      this.loadedPosts = [];
+    });
+  }
+
+  ngOnDestroy() {
+    this.errorSub.unsubscribe();
+  }
+
+  onHandleError() {
+    this.error = null;
+  }
+}
+
+```
+
+
+
+
+
+```typescript
+
+// post.service.ts
+
+import {
+  HttpClient,
+  HttpEventType,
+  HttpHeaders,
+  HttpParams,
+} from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Subject, throwError } from "rxjs";
+import { catchError, map, tap } from "rxjs/operators";
+
+import { Post } from "./post.model";
+
+@Injectable({ providedIn: "root" })
+export class PostService {
+  constructor(private http: HttpClient) {}
+
+  errorMsg = new Subject<string>();
+
+  createAndStorePost(title: string, content: string) {
+    const postData: Post = { title: title, content: content };
+
+    // Send Http request
+    // request only sent when it is subscribed
+    this.http
+      .post<{ name: string }>(
+        "https://ng-guide-bc7ef-default-rtdb.firebaseio.com/posts.json",
+        postData,
+        {
+          // receive the whole response data (including header body status etc.) otherwise, only body response
+          observe: "response",
+        }
+      )
+      .subscribe(
+        (responseData) => {
+          console.log(responseData);
+        },
+        (error) => {
+          this.errorMsg.next(error.message);
+        }
+      );
+  }
+
+  fetchPosts() {
+    // attach multiple params
+    let searchParams = new HttpParams();
+    searchParams = searchParams.append("print", "pretty");
+    searchParams = searchParams.append("custom", "key");
+
+    return (
+      this.http
+        // indicate response body type
+        .get<{ [key: string]: Post }>(
+          "https://ng-guide-bc7ef-default-rtdb.firebaseio.com/posts.json",
+
+          // add http header
+          {
+            headers: new HttpHeaders({ "Custom-Header": "Hello" }),
+            // https://ng-guide-bc7ef-default-rtdb.firebaseio.com/posts.json?print=pretty
+            // params: new HttpParams().set("print", "pretty"),
+
+            // https://ng-guide-bc7ef-default-rtdb.firebaseio.com/posts.json?print=pretty&custom=key
+            params: searchParams,
+
+            // default json, it can also be text etc.
+            responseType: "json",
+          }
+        )
+        .pipe(
+          map((responseData) => {
+            const postsArray: Post[] = [];
+
+            for (const key in responseData) {
+              if (responseData.hasOwnProperty(key)) {
+                postsArray.push({ ...responseData[key], id: key });
+              }
+            }
+            return postsArray;
+          }),
+          catchError((errorRes) => {
+            // do some genetic tasks (e.g. send to analytics server etc.)
+            return throwError(errorRes);
+          })
+        )
+    );
+  }
+
+  deletePosts() {
+    return this.http
+      .delete(
+        "https://ng-guide-bc7ef-default-rtdb.firebaseio.com/posts.json/",
+        {
+          observe: "events",
+        }
+      )
+      .pipe(
+        tap((event) => {
+          console.log(event);
+          if (event.type === HttpEventType.Sent) {
+            // ...
+          }
+          if (event.type === HttpEventType.Response) {
+            console.log(event.body);
+          }
+        })
+      );
+  }
+}
+
+```
+
+
+
+### Interceptors
+
+example
+
+```typescript
+
+// auth-interceptor.serve.ts
+
+import {
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest,
+} from "@angular/common/http";
+
+export class AuthInterceptorService implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler) {
+    console.log("Request is on the way");
+    console.log(req.url);
+
+    const modifiedRequest = req.clone({
+      headers: req.headers.append("Auth", "xyzs"),
+    });
+
+    // after "handle" to manipulate http response data
+    return next.handle(modifiedRequest);
+  }
+}
+
+
+```
+
+
+
+```typescript
+
+// logging-interceptor.service.ts
+
+import {
+  HttpEventType,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest,
+} from "@angular/common/http";
+import { tap } from "rxjs/operators";
+
+export class LoggingInterceptorService implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler) {
+    console.log("Outgoing request");
+    console.log(req.url);
+    console.log(req.headers);
+
+    // after "handle" to manipulate http response data
+    return next.handle(req).pipe(
+      tap((event) => {
+        if (event.type === HttpEventType.Response) {
+          console.log("Incoming response");
+          console.log(event.body);
+        }
+      })
+    );
+  }
+}
+
+```
+
+
+
+
+
+```typescript
+
+// app.module.ts
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule, FormsModule, HttpClientModule],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptorService,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: LoggingInterceptorService,
+      multi: true,
+    },
+  ],
+  bootstrap: [AppComponent],
+})
+
+```
 
