@@ -202,3 +202,17 @@ onSelected() {
 
 
 
+### Http
+
+1. create `data-storage.service.ts` under `shared`
+2. imort `HttpClientModule ` in the `app.module.ts`
+3. add `  onSaveData` in the header component
+
+
+
+**Add `resolver` to make sure data is loaded whenever entering the page**
+
+1. create `recipes-resolver.service.ts`
+2. Modify `fetchRecipes` in the `data-storage.service.ts` and `header.component.ts`
+3. add `resolve: [RecipeResolverService],` in the `app-routing.module.ts`
+
