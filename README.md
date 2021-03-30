@@ -15,9 +15,13 @@ Max's Angular-The-Complete-Guide
 
 ### Forms
 
+### Using pipes to Transform Output
+
 ### Making Http Requests
 
-### Authentication $ Route Protection 
+### Authentication & Route Protection 
+
+### Dynamic Components
 
 ### Angular Modules & Optimizing Angular Apps
 
