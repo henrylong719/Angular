@@ -68,3 +68,17 @@ since fetching or saving request needs to have user token
 
 
 
+## Dynamic Components
+
+<img src="/Users/henrylong/Angular/Angular/images/dynamic-components.png" alt="dynamic-components" style="zoom:50%;" />
+
+
+
+1. create `alert` component under `shared` folder
+2. import `AlertComponet` to `app.module.ts`
+3. use alert in the `auth.component.html`
+
+
+
+**Programmatic create dynamic components**
+
