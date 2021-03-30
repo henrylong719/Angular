@@ -282,3 +282,13 @@ since fetching or saving request needs to have user token
 14. create `auth.guard.ts` under `auth`
 15. import `AuthGuard` in the `app-routing.module.ts`
 
+
+
+### Dynamic Components
+
+
+
+1. create `alert` component under `shared` folder
+2. import `AlertComponet` to `app.module.ts`
+3. use alert in the `auth.component.html`
+

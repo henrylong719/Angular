@@ -82,3 +82,125 @@ since fetching or saving request needs to have user token
 
 **Programmatic create dynamic components**
 
+.....
+
+
+
+### Angular Modules & Optimizing Angular Apps
+
+
+
+<img src="/Users/henrylong/Angular/Angular/images/modules.png" alt="modules" style="zoom:50%;" />
+
+
+
+
+
+### Splitting Modules
+
+Example: Recipe module 
+
+1. Create `recipes.module.ts` under `recipes`  folder
+
+2. move all recipes relared components to the `recipes.module.ts` and import ` RecipesModule` in the `app.module.ts`
+
+3. Import `RecipesRoutingModule,` in the `recipes.module.ts`
+
+   
+
+
+**Share Modules**
+
+1. create `shared.module.ts`
+2. import `shared.module.ts` in the `recipes.module.ts` `shopping-list.module.ts` (they use `CommonModule,` in the `share module.ts`) and `app.module.ts`
+
+
+
+**Core Module**
+
+core module is used to replaced the `providers` in the `app.module.ts`
+
+
+
+1. create `core.module.ts`
+2. import `core.module.ts` in the `app.module.ts`
+
+
+
+**Auth Module**
+
+
+
+
+
+### Lazy Loading
+
+
+
+<img src="/Users/henrylong/Angular/Angular/images/lazy-loading.png" alt="lazy-loading" style="zoom:50%;" />
+
+
+
+**Recipes routing** example
+
+1. in the `recipes-routing.module.ts` , change the path to ''
+
+```typescript
+
+// path: 'recipes',
+    path:'',
+      
+```
+
+
+
+2. in the `app-routing.module.ts`, modify the appRoutes
+
+```typescript
+
+const appRoutes = [
+  { path: '', redirectTo: '/recipes', pathMatch: 'full' },
+  // for lazy loading
+  {
+    path: 'recipes',
+    loadChildren: () =>
+      import('./recipes/recipes.module').then((m) => m.RecipesModule),
+  },
+];
+    
+```
+
+
+
+3. in the `tsconfig.app.json`, set:
+
+```typescript
+
+    "module": "esnext",
+      
+```
+
+
+
+
+
+### preloading lazy-loaded code
+
+
+
+```typescript
+
+// app-routing.module.ts
+
+@NgModule({
+  imports: [
+    // preloading lazy-loaded code
+    RouterModule.forRoot(appRoutes, { preloadingStrategy: PreloadAllModules }),
+  ],
+  exports: [RouterModule],
+})
+```
+
+
+
+ 
