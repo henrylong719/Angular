@@ -15,4 +15,23 @@ Max's Angular-The-Complete-Guide
 
 ### Forms
 
+### Making Http Requests
+
+### Authentication $ Route Protection 
+
+### Angular Modules & Optimizing Angular Apps
+
+### Deployment
+
+
+https://ng-recipe-book-27711.web.app/
+
+
+Testing Account
+
+email: admin1@example.com
+
+password: 12345678
+
+
 
