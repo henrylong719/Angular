@@ -31,11 +31,3 @@ Max's Angular-The-Complete-Guide
 https://ng-recipe-book-27711.web.app/
 
 
-Testing Account
-
-email: admin1@example.com
-
-password: 12345678
-
-
-
