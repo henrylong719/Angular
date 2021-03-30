@@ -292,3 +292,177 @@ since fetching or saving request needs to have user token
 2. import `AlertComponet` to `app.module.ts`
 3. use alert in the `auth.component.html`
 
+
+
+
+
+### Angular Modules & Optimizing Angular Apps
+
+
+
+<img src="/Users/henrylong/Angular/Angular/images/modules.png" alt="modules" style="zoom:50%;" />
+
+
+
+
+
+### Splitting Modules
+
+Example: Recipe module 
+
+1. Create `recipes.module.ts` under `recipes`  folder
+
+2. move all recipes relared components to the `recipes.module.ts` and import ` RecipesModule` in the `app.module.ts`
+
+3. Import `RecipesRoutingModule,` in the `recipes.module.ts`
+
+   
+
+**Share Modules**
+
+1. create `shared.module.ts`
+2. import `shared.module.ts` in the `recipes.module.ts` `shopping-list.module.ts` (they use `CommonModule,` in the `share module.ts`) and `app.module.ts`
+
+
+
+**Core Module**
+
+core module is used to replaced the `providers` in the `app.module.ts`
+
+
+
+1. create `core.module.ts`
+2. import `core.module.ts` in the `app.module.ts`
+
+
+
+**Auth Module**
+
+
+
+
+
+### Lazy Loading
+
+
+
+<img src="/Users/henrylong/Angular/Angular/images/lazy-loading.png" alt="lazy-loading" style="zoom:50%;" />
+
+
+
+**Recipes routing** example
+
+1. in the `recipes-routing.module.ts` , change the path to ''
+
+```typescript
+// path: 'recipes',
+    path:'',
+      
+```
+
+
+
+2. in the `app-routing.module.ts`, modify the appRoutes
+
+```typescript
+const appRoutes = [
+  { path: '', redirectTo: '/recipes', pathMatch: 'full' },
+  // for lazy loading
+  {
+    path: 'recipes',
+    loadChildren: () =>
+      import('./recipes/recipes.module').then((m) => m.RecipesModule),
+  },
+];
+    
+```
+
+
+
+3. in the `tsconfig.app.json`, set:
+
+```typescript
+    "module": "esnext",
+      
+```
+
+
+
+
+
+### preloading lazy-loaded code
+
+
+
+```typescript
+// app-routing.module.ts
+
+@NgModule({
+  imports: [
+    // preloading lazy-loaded code
+    RouterModule.forRoot(appRoutes, { preloadingStrategy: PreloadAllModules }),
+  ],
+  exports: [RouterModule],
+})
+```
+
+
+
+ 
+
+
+
+### Ahead of Time Compilation
+
+<img src="/Users/henrylong/Angular/Angular/images/Compilation.png" alt="Compilation" style="zoom:50%;" />
+
+```bash
+$ ng build --prod
+```
+
+
+
+### Deployment
+
+1. ```bash
+   $ sudo npm install -g firebase-tools
+   ```
+
+2. ```bash
+   $ firebase login
+   ```
+
+3. ```bash
+   $ firebase init
+   ```
+
+4. ```bash
+   $ What do you want to use as your public directory? dist/my-first-app
+   ```
+
+5. ```bash
+   $ File dist/my-first-app/index.html already exists. Overwrite? (y/N) N
+   ```
+
+6. ```bash
+   $ firebase deploy
+   ```
+
+
+
+```bash
+Hosting URL: https://ng-recipe-book-27711.web.app
+```
+
+
+
+
+
+testing account:
+
+
+
+admin1@example.com
+
+12345678
+

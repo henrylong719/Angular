@@ -217,13 +217,37 @@ $ ng build --prod
 
 
 
+### Deployment
+
+1. ```bash
+   $ sudo npm install -g firebase-tools
+   ```
+
+2. ```bash
+   $ firebase login
+   ```
+
+3. ```bash
+   $ firebase init
+   ```
+
+4. ```bash
+   $ What do you want to use as your public directory? dist/my-first-app
+   ```
+
+5. ```bash
+   $ File dist/my-first-app/index.html already exists. Overwrite? (y/N) N
+   ```
+
+6. ```bash
+   $ firebase deploy
+   ```
 
 
 
-
-
-
-
+```bash
+Hosting URL: https://ng-recipe-book-27711.web.app
+```
 
 
 
