@@ -204,3 +204,26 @@ const appRoutes = [
 
 
  
+
+
+
+### Ahead of Time Compilation
+
+<img src="/Users/henrylong/Angular/Angular/images/Compilation.png" alt="Compilation" style="zoom:50%;" />
+
+```bash
+$ ng build --prod
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
