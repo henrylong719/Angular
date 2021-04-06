@@ -40,6 +40,18 @@ since fetching or saving request needs to have user token
 
 7. import `auth-interceptor.service.ts` in the `app.module.ts`
 
+   ```typescript
+   
+   {
+         provide: HTTP_INTERCEPTORS,
+         useClass: AuthInterceptorService,
+         multi: true,
+       },
+         
+   ```
+   
+   
+   
    
    
 8. create `  logout` in the `auth.service.ts` and import it into `header component`
