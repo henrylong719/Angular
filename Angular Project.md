@@ -2,7 +2,7 @@
 
 
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-18 at 9.23.59 am.png" alt="Screen Shot 2021-03-18 at 9.23.59 am" style="zoom:60%;" />
+<img src="images/15.png" alt="15" style="zoom:50%;" />
 
 ### The Basics
 
@@ -12,9 +12,9 @@
 
 
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-18 at 10.05.23 am.png" alt="Screen Shot 2021-03-18 at 10.05.23 am" style="zoom:45%;" />
 
 
+<img src="images/16.png" alt="16" style="zoom:50%;" />
 
 2. add navigation
 
@@ -166,7 +166,7 @@ onSelected() {
 
 ### Routing
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-26 at 10.06.23 am.png" alt="Screen Shot 2021-03-26 at 10.06.23 am" style="zoom:50%;" />
+<img src="images/17.png" alt="17" style="zoom:50%;" />
 
 
 
@@ -300,7 +300,7 @@ since fetching or saving request needs to have user token
 
 
 
-<img src="/Users/henrylong/Angular/Angular/images/modules.png" alt="modules" style="zoom:50%;" />
+<img src="images/modules.png" alt="modules" style="zoom:50%;" />
 
 
 
@@ -346,7 +346,7 @@ core module is used to replaced the `providers` in the `app.module.ts`
 
 
 
-<img src="/Users/henrylong/Angular/Angular/images/lazy-loading.png" alt="lazy-loading" style="zoom:50%;" />
+<img src="images/lazy-loading.png" alt="lazy-loading" style="zoom:50%;" />
 
 
 
@@ -414,7 +414,7 @@ const appRoutes = [
 
 ### Ahead of Time Compilation
 
-<img src="/Users/henrylong/Angular/Angular/images/Compilation.png" alt="Compilation" style="zoom:50%;" />
+<img src="images/Compilation.png" alt="Compilation" style="zoom:50%;" />
 
 ```bash
 $ ng build --prod

@@ -4,7 +4,7 @@
 
 ## Authentication
 
-<img src="/Users/henrylong/Angular/Angular/images/Authentication.png" alt="Authentication" style="zoom:50%;" />
+<img src="images/Authentication.png" alt="Authentication" style="zoom:50%;" />
 
 In the recipe book project
 
@@ -82,7 +82,7 @@ since fetching or saving request needs to have user token
 
 ## Dynamic Components
 
-<img src="/Users/henrylong/Angular/Angular/images/dynamic-components.png" alt="dynamic-components" style="zoom:50%;" />
+<img src="images/dynamic-components.png" alt="dynamic-components" style="zoom:50%;" />
 
 
 
@@ -102,7 +102,7 @@ since fetching or saving request needs to have user token
 
 
 
-<img src="/Users/henrylong/Angular/Angular/images/modules.png" alt="modules" style="zoom:50%;" />
+<img src="images/modules.png" alt="modules" style="zoom:50%;" />
 
 
 
@@ -149,7 +149,7 @@ core module is used to replaced the `providers` in the `app.module.ts`
 
 
 
-<img src="/Users/henrylong/Angular/Angular/images/lazy-loading.png" alt="lazy-loading" style="zoom:50%;" />
+<img src="images/lazy-loading.png" alt="lazy-loading" style="zoom:50%;" />
 
 
 
@@ -221,7 +221,7 @@ const appRoutes = [
 
 ### Ahead of Time Compilation
 
-<img src="/Users/henrylong/Angular/Angular/images/Compilation.png" alt="Compilation" style="zoom:50%;" />
+<img src="images/Compilation.png" alt="Compilation" style="zoom:50%;" />
 
 ```bash
 $ ng build --prod

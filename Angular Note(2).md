@@ -492,7 +492,7 @@ export class ErrorPageComponent implements OnInit {
 
 ## Observable
 
-<img src="/Users/henrylong/Angular/Angular/images/observable.png" alt="observable" style="zoom:50%;" />
+<img src="images/8.png" alt="8" style="zoom:50%;" />
 
 
 
@@ -560,7 +560,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
 ### Operators
 
-<img src="/Users/henrylong/Angular/Angular/images/operators.png" alt="operators" style="zoom:50%;" />
+<img src="images/9.png" alt="9" style="zoom:50%;" />
 
 
 
@@ -623,9 +623,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
 
 
-Only use subjects to **communicate  across components** through **services**
+Only use subje<img src="images/10.png" alt="10" style="zoom:50%;" />cts to **communicate  across components** through **services**
 
-<img src="/Users/henrylong/Angular/Angular/images/Subject.png" alt="Subject" style="zoom:50%;" />
+
 
 
 
@@ -750,9 +750,9 @@ export class AppComponent implements OnInit {
 
 ```
 
+<img src="images/11.png" alt="11" style="zoom:50%;" />
 
 
-<img src="/Users/henrylong/Angular/Angular/images/Subject2.png" alt="Subject2" style="zoom:50%;" />
 
 
 
@@ -797,13 +797,13 @@ For the `onActivated` in the `user.component.ts` , replace `emit()` with `next()
 
 ## Forms
 
-<img src="/Users/henrylong/Angular/Angular/images/form.png" alt="form" style="zoom:50%;" />
+<img src="images/12.png" alt="12" style="zoom:50%;" />
+
+<img src="images/13.png" alt="13" style="zoom:50%;" />
 
 
 
 
-
-<img src="/Users/henrylong/Angular/Angular/images/form2.png" alt="form2" style="zoom:50%;" />
 
 
 
@@ -2060,13 +2060,13 @@ appStatus = new Promise((resolve, reject) => {
 
 ```
 
-
+<img src="images/14.png" alt="14" style="zoom:50%;" />
 
 ## Making Http Requests
 
 
 
-<img src="/Users/henrylong/Angular/Angular/images/makingHttpRequest.png" alt="makingHttpRequest" style="zoom:45%;" />
+
 
 
 

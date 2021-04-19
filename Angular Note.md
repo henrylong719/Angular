@@ -17,9 +17,9 @@ ng serve
 
 ## Course Structure
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-17 at 10.51.26 am.png" alt="Screen Shot 2021-03-17 at 10.51.26 am" style="zoom:45%;" />
 
 
+<img src="images/1.png" alt="1" style="zoom:50%;" />
 
 **Import bootstrap into project**
 
@@ -106,9 +106,9 @@ $ ng g c componentName
 
 ### Databinding
 
+<img src="images/2.png" alt="2" style="zoom:50%;" />
 
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-17 at 2.27.37 pm.png" alt="Screen Shot 2021-03-17 at 2.27.37 pm" style="zoom:67%;" />
 
 
 
@@ -970,7 +970,7 @@ export class CockpitComponent implements OnInit {
 
 
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-18 at 2.47.31 pm.png" alt="Screen Shot 2021-03-18 at 2.47.31 pm" style="zoom:50%;" />
+<img src="images/3.png" alt="3" style="zoom:50%;" />
 
 
 
@@ -984,7 +984,7 @@ export class CockpitComponent implements OnInit {
 
 
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-19 at 11.57.59 am.png" alt="Screen Shot 2021-03-19 at 11.57.59 am" style="zoom:50%;" />
+<img src="./images/4.png" alt="4" style="zoom:50%;" />
 
 ### ngFor and ngIf Recap
 
@@ -1419,7 +1419,7 @@ export class UnlessDirective {
 
 ### Services
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-24 at 2.48.52 pm.png" alt="Screen Shot 2021-03-24 at 2.48.52 pm" style="zoom:50%;" />
+<img src="images/5.png" alt="5" style="zoom:50%;" />
 
 
 
@@ -1623,9 +1623,9 @@ export class AccountComponent {
 
 ```
 
+<img src="images/6.png" alt="6" style="zoom:50%;" />
 
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-24 at 4.11.55 pm.png" alt="Screen Shot 2021-03-24 at 4.11.55 pm" style="zoom:50%;" />
 
 **Injecting Services into Services**
 
@@ -1808,9 +1808,9 @@ export class NewAccountComponent {
 
 **Second way to provide the services**
 
-<img src="/Users/henrylong/Library/Application Support/typora-user-images/Screen Shot 2021-03-24 at 5.07.02 pm.png" alt="Screen Shot 2021-03-24 at 5.07.02 pm" style="zoom:80%;" />
 
 
+<img src="images/7.png" alt="7" style="zoom:50%;" />
 
 **Example 2**
 
